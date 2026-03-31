@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <title>文字列頻出単語検出</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg-color: #ffffff;
+      --text-color: #000000;
+      --main-color: #4CAF50;
+    }
+
+    /*@media (prefers-color-scheme: dark) {
+      :root {
+        --border-color: var(--border-color-dark);
+        --bg-color: light-dark(#ffffff, #1e1e1e);
+        --main-color: light-dark(#4CAF50, #255226);
+        --text-color: light-dark(#000000, #ccc);
+      }
+    }*/
+
+    .dark-theme {
+      --bg-color: #1e1e1e;
+      --text-color: #ccc;
+      --main-color: #255226;
+      transition: .5s;
+    }
+
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 10px;
+      background: var(--bg-color);
+      color: var(--text-color);
+      transition: background .5s, color .5s;
+    }
+
+    .section {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      /*background: var(--bg-color);*/
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 16px;
+      border-bottom: 2px solid var(--main-color);
+      padding-bottom: 5px;
+    }
+
+    textarea {
+      background-color: var(--bg-color);
+      width: 98%;
+      height: 50px;
+      padding: 5px;
+      color: var(--text-color);
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      transition: .5s;
+    }
+
+    input[type="text"] {
+      width: 98%;
+      padding: 5px;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      transition: .5s;
+    }
+
+    button {
+      background: var(--main-color);
+      color: var(--text-color);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #1a3b1c;
+    }
+
+    #btn {
+      background: #06015f;
+      color: #ccc;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: auto;
+      font-weight: bold;
+    }
+
+    #btn:hover {
+      background: #050038;
+    }
+
+    #download-btn:disabled {
+      background: gray;
+      color: var(--text-color);
+    }
+
+    #loading {
+      animation: blink 1s linear infinite;
+      color: var(--text-color);
+      transition: color 1s;
+
+    }
+
+    /*.blink {
+      animation: blink 1s linear infinite;
+      color: var(--text-color);
+      
+    }*/
+
+    @keyframes blink {
+      0% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="section">
+    <h2>単語検出したい文章を入力</h2>
+    <textarea id="input" placeholder="ctrl+vで貼り付け、またはtextファイルをドラッグandドロップ"></textarea>
+  </div>
+  <div class="section">
+    <h2>除外したい文字列</h2>
+    <input id="exclude" type="text" placeholder="助詞、接続詞や冠名詞を,カンマ区切りで複数記入できます。">
+  </div>
+  <button onclick="analyze()">解析実行</button>
+  </div>
+  <div class="section">
+    <h2>検出結果（上位20件）</h2>
+
+    <div id="loading"></div>
+    <ul id="result"></ul>
+    <button id="download-btn">CSVダウンロード</button>
+  </div>
+
+  <button id="btn">ライト/ダーク</button>
+
+  <script>
+    const loading = document.getElementById('loading');
+
+    let isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // 初期反映
+    if (isDark) {
+      document.body.classList.add('dark-theme');
+    }
+    const btn = document.querySelector('#btn');
+
+    btn.addEventListener('click', () => {
+      isDark = !isDark;
+      document.body.classList.toggle('dark-theme', isDark);
+      btn.textContent = isDark ? "ライトモード" : "ダークモード";
+      //テキストでモード変更
+      //if (btn.textContent === 'ダークモード') {
+      //  btn.textContent = 'ライトモード';
+      //} else {
+      //  btn.textContent = 'ダークモード';
+      //}
+    });
+
+    //const text = document.getElementById("input").value;
+
+    //Dropイベントでファイルを受け取る、再読み込みを防ぐ
+    const text = document.getElementById('input');
+    // デフォルト動作を無効化
+    document.addEventListener('dragover', e => e.preventDefault());
+    //text.addEventListener('dragover', () => {
+    //  text.style.backgroundColor = '#ccc';
+    //  text.style.color = '#000000';
+    //});
+
+    // ドラッグがエリアから外れた時
+    //text.addEventListener('dragleave', () => {
+    //  text.style.backgroundColor = '';
+    //  text.style.color = '';
+    //});
+
+    // ドロップ時の処理
+    document.addEventListener('drop', e => e.preventDefault());
+    text.addEventListener('drop', (e) => {
+      e.preventDefault(); // ブラウザがファイルを開くのを防ぐ
+
+      // ファイル情報の取得
+      const files = e.dataTransfer.files;
+
+      if (files.length > 0) {
+        const file = files[0];
+
+        // ファイルの形式チェック（textファイルのみ）
+        if (file.type.indexOf('text') !== -1 || file.name.endsWith('.txt')) {
+          const reader = new FileReader();
+
+          // ファイル読み込みが完了した時の処理
+          reader.onload = (event) => {
+            // テキストエリアに内容を挿入
+            text.value = event.target.result;
+          };
+
+          // ファイルをテキストとして読み込む
+          reader.readAsText(file);
+        } else {
+          alert('テキストファイルをドロップしてください。');
+        }
+      }
+      console.log(text);
+    });
+
+    let latestCounts = {};
+
+    const downloadBtn = document.getElementById('download-btn');
+    downloadBtn.disabled = true;
+
+    function analyze() {
+      const MAX_WORDS = 10000;
+
+      const exclude = document.getElementById("exclude").value
+        .split(",")
+        .map(w => w.trim().toLowerCase());
+      //余白を取って小文字にあわせて比較
+
+      //入力バリデーション
+      if (!text.value.trim()) {
+        alert("入力してください");
+        return;
+      }
+      //クレンジング、正規表現で数字、記号をunicode指定
+      const cleaned = text.value.replace(/[^\p{L}\p{N}]+/gu, " ");
+      //単語ごとに分割、上限を1万件まで、メモリ節約
+      const words = cleaned.split(" ").slice(0, MAX_WORDS);
+      //除外とカウント
+      const result = document.getElementById('result');
+      loading.textContent = "処理中...";
+      //loading.classList.add('blink');
+      result.innerHTML = "";
+      setTimeout(() => {
+        const counts = {};
+        //1文字以上の単語を小文字統一で除外ワードと比較
+        words.forEach(w => {
+          const t = w.toLowerCase();
+          if (w.length <= 1) return;
+          if (exclude.includes(t)) return;
+          //undefaind回避
+
+          counts[t] = (counts[t] || 0) + 1;
+        });
+        //昇順でソート20件までメソッドチェーンで一括処理、テンプレートリテラルで見やすく少なく記述、conTextでXSS対策
+        const fragment = document.createDocumentFragment();
+        Object.entries(counts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 20)
+          .forEach(([word, count]) => {
+            const li = document.createElement("li");
+            li.textContent = `${word} : ${count}`;
+            fragment.appendChild(li);
+          });
+        //表示、fragmentを使ってDOMの描画回数を1回に
+        result.appendChild(fragment);
+        //単語が空の時
+        if (Object.keys(counts).length === 0) {
+          result.innerHTML = "単語が見つかりませんでした";
+          downloadBtn.disabled = true;
+          return;
+        }
+        //CSVダウンロード用
+        downloadBtn.disabled = false;
+        latestCounts = counts;
+        //console.log(latestCounts);
+
+        loading.textContent = "";
+        //loading.classList.remove('blink');
+      }, 500);
+    };
+    //CSVダウンロード部分
+    document.getElementById('download-btn').addEventListener('click', () => {
+      const rows = Object.entries(latestCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 20);
+      //ヘッダー
+      let csvOutput = "word,count\n";
+      csvOutput += rows
+        .map(([word, count]) => `"${word}",${count}`)
+        .join("\n");
+
+      //データ互換性
+      const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+      const blob = new Blob([bom, csvOutput], { type: 'text/csv' });
+      //ダウンロード
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'data.csv';
+      a.click();
+      //メモリ開放
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+
+</html>
