@@ -3,8 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+
   <title>文字列頻出単語検出</title>
   <style>
     :root {
@@ -305,15 +304,23 @@
       const rows = Object.entries(latestCounts)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 20);
-      //ヘッダー
 
-      //出力データCSVインジェクション対策
-      let csvOutput = "word,count\n";
-      csvOutput += rows
+      //出力データExcel数式対策
+      const safeRows = rows
         .map(([word, count]) => {
+          //演算子除去
           const safeWord = word.replace(/^[=+\-@]/, "'$&");
-          return `"${safeWord}",${count}`.join("\n");
-        });
+          return [safeWord, count];
+        })
+        .filter(([safeWord]) => safeWord.trim() !== "");
+
+      //ヘッダー
+      let csvOutput = "word,count\n";
+
+      csvOutput += safeRows
+        .map(([safeword, count]) => {
+          return `"${safeword}",${count}`;
+        }).join("\n");
 
       //データ互換性
       const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
