@@ -21,4 +21,4 @@
 - Blob + BOMでCSV出力対応
 
 ## URL
-https://itsys07.github.io/WebPageTest.git
+https://itsys07.github.io/WebPageTest
