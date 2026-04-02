@@ -204,33 +204,34 @@
       const files = e.dataTransfer.files;
       if (files.length > 0) {
         const file = files[0];
-      }
-      if (file.size > 1_000_000) {
-        alert("ファイルが大きすぎます");
-        return;
-      }
-      // ファイルの形式チェック（textファイルのみ）
-      const isTxtExt = file.name.toLowerCase().endsWith('.txt');
-      const isTextMime = file.type === '' || file.type === 'text/plain';
-      if (!isTxtExt || !isTextMime) {
-        alert("txtのみ対応しています");
-        return;
-      }
-      if (file.type.indexOf('text') !== -1 || file.name.endsWith('.txt')) {
-        const reader = new FileReader();
 
-        // ファイル読み込みが完了した時の処理
-        reader.onload = (event) => {
-          // テキストエリアに内容を挿入
-          text.value = event.target.result;
-        };
+        if (file.size > 1_000) {
+          alert("ファイルが大きすぎます");
+          return;
+        }
+        // ファイルの形式チェック（textファイルのみ）
+        const isTxtExt = file.name.toLowerCase().endsWith('.txt');
+        const isTextMime = file.type === '' || file.type === 'text/plain';
+        if (!isTxtExt || !isTextMime) {
+          alert("txtのみ対応しています");
+          return;
+        }
+        if (file.type.indexOf('text') !== -1 || file.name.endsWith('.txt')) {
+          const reader = new FileReader();
 
-        // ファイルをテキストとして読み込む
-        reader.readAsText(file);
-      } else {
-        alert('テキストファイルをドロップしてください。');
+          // ファイル読み込みが完了した時の処理
+          reader.onload = (event) => {
+            // テキストエリアに内容を挿入
+            text.value = event.target.result;
+          };
+
+          // ファイルをテキストとして読み込む
+          reader.readAsText(file);
+        } else {
+          alert('テキストファイルをドロップしてください。');
+        }
+        //console.log(text);
       }
-      //console.log(text);
     });
 
     let latestCounts = {};
