@@ -111,6 +111,25 @@ button:hover {
     color: var(--text-color);
 }
 
+#mode{
+
+    width: 100%;
+    max-width: 300px;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    cursor: pointer;
+
+}
+
+#modde:hover {
+  border-color: #888;
+}
+
+
 /*#loading {
     animation: blink 1s linear infinite;
     color: var(--text-color);

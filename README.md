@@ -39,6 +39,7 @@ AIを使うほどではない軽い分析用途を想定しています。
 - メモリ使用量を考慮し最大処理数を制限
 - textContentによるXSS対策
 - Blob + BOMでCSV出力対応
+- CSVインジェクション対策（先頭文字エスケープ）
 
 ## URL
 https://itsys07.github.io/WebPageTest

@@ -68,6 +68,12 @@ text.addEventListener('drop', (e) => {
     }
 });
 
+const presets = {
+  words: /[^\p{L}\p{N}]+/gu,
+  numbers: /[^\d]+/g,
+  hiragana: /[^\p{Script=Hiragana}]+/gu
+};
+
 const clearBtn = document.getElementById('clearBtn');
 clearBtn.addEventListener('click', () => {
     // 3. textareaの値を空にする
@@ -80,7 +86,8 @@ downloadBtn.disabled = true;
 
 function analyze() {
     const MAX_WORDS = 10000;
-
+    const mode = document.getElementById("mode").value;
+    const regex = presets[mode];
     const exclude = document.getElementById("exclude").value
     .split(",")
     .map(w => w.trim().toLowerCase());
@@ -92,7 +99,8 @@ function analyze() {
     return;
     }
     //クレンジング、正規表現で文字列、数字をunicode指定してそれ以外は空白に置き換える
-    const cleaned = text.value.replace(/[^\p{L}\p{N}]+/gu, " ");
+    //const cleaned = text.value.replace(/[^\p{L}\p{N}]+/gu, " ");
+    const cleaned = text.value.replace(regex, " ");
     //単語ごとに分割、上限を1万件まで、メモリ節約
     const words = cleaned.split(" ").slice(0, MAX_WORDS);
     //除外とカウント
@@ -120,6 +128,11 @@ function analyze() {
         const li = document.createElement("li");
         li.textContent = `${word} : ${count}`;
         fragment.appendChild(li);
+        //結果クリックで除外して再抽出
+        li.addEventListener("click", () => {
+            addExclude(word);
+            analyze();
+            });
         });
     //表示、fragmentを使ってDOMの描画回数を1回に
     result.appendChild(fragment);
@@ -129,6 +142,7 @@ function analyze() {
         downloadBtn.disabled = true;
         return;
     }
+
     downloadBtn.disabled = false;
     //CSVダウンロード用
     latestCounts = counts;
@@ -138,6 +152,21 @@ function analyze() {
     loading.classList.remove('blink');
     }, 500);
 };
+
+function addExclude(word) {
+    const excludeInput = document.getElementById("exclude");
+
+    const current = excludeInput.value
+        .split(",")
+        .map(w => w.trim())
+        .filter(w => w !== "");
+
+    if (!current.includes(word)) {
+        current.push(word);
+        excludeInput.value = current.join(", ");
+    }
+}
+
 //CSVダウンロード部分
 document.getElementById('downloadBtn').addEventListener('click', () => {
     const rows = Object.entries(latestCounts)
