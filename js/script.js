@@ -1,5 +1,7 @@
 let latestCounts = {};
 
+let tags = [];
+
 const loading = document.getElementById('loading');
 
 let isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -84,13 +86,50 @@ clearBtn.addEventListener('click', () => {
 const downloadBtn = document.getElementById('downloadBtn');
 downloadBtn.disabled = true;
 
+const exclude = document.getElementById("exclude");
+      
+const addBtn = document.getElementById('addBtn');
+const tagDisplay = document.getElementById('tagDisplay');
+
+function addTag() {
+    const tagText = exclude.value;
+    if (tagText && !tags.includes(tagText)) {
+        tags.push(tagText); // 配列に追加
+        exclude.value = '';
+        renderTags();
+    }
+}
+
+function renderTags() {
+    tagDisplay.innerHTML = ''; // 一旦クリア
+    tags.forEach((tag, index) => {
+        const tagSpan = document.createElement('span');
+        tagSpan.className = 'tag-item';
+        tagSpan.innerHTML = `
+            ${tag}
+            <span class="remove-tag" data-index="${index}">x</span>
+        `;
+        tagDisplay.appendChild(tagSpan);
+    });
+}
+
+tagDisplay.addEventListener('click', (e) => {
+    if (e.target.classList.contains('remove-tag')) {
+        const index = e.target.getAttribute('data-index');
+        tags.splice(index, 1); // 配列から要素を削除
+        renderTags(); // 再描画
+    }
+});
+
+addBtn.addEventListener('click', addTag);
+
 function analyze() {
     const MAX_WORDS = 10000;
     const mode = document.getElementById("mode").value;
     const regex = presets[mode];
-    const exclude = document.getElementById("exclude").value
-    .split(",")
-    .map(w => w.trim().toLowerCase());
+    //const exclude = document.getElementById("exclude").value
+    //.split(",")
+    //.map(w => w.trim().toLowerCase());
     //余白を取って小文字にあわせて比較
 
     //入力バリデーション
@@ -116,7 +155,7 @@ function analyze() {
     words.forEach(w => {
         const t = w.toLowerCase();
         if (w.length <= 1) return;
-        if (exclude.includes(t)) return;
+        if (tags.includes(t)) return;
         //undefaind回避
         counts[t] = (counts[t] || 0) + 1;
     });
@@ -132,6 +171,7 @@ function analyze() {
         //結果クリックで除外して再抽出
         li.addEventListener("click", () => {
             addExclude(word);
+            addTag();
             analyze();
             });
         });
