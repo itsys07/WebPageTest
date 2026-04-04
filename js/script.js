@@ -67,7 +67,7 @@ text.addEventListener('drop', (e) => {
     //console.log(text);
     }
 });
-
+//クレンジング、正規表現で文字列、数字をunicode指定してそれ以外は空白に置き換える
 const presets = {
   words: /[^\p{L}\p{N}]+/gu,
   numbers: /[^\d]+/g,
@@ -98,8 +98,9 @@ function analyze() {
     alert("入力してください");
     return;
     }
-    //クレンジング、正規表現で文字列、数字をunicode指定してそれ以外は空白に置き換える
+
     //const cleaned = text.value.replace(/[^\p{L}\p{N}]+/gu, " ");
+    //textから正規表現に一致するものを空白に
     const cleaned = text.value.replace(regex, " ");
     //単語ごとに分割、上限を1万件まで、メモリ節約
     const words = cleaned.split(" ").slice(0, MAX_WORDS);
@@ -119,7 +120,7 @@ function analyze() {
         //undefaind回避
         counts[t] = (counts[t] || 0) + 1;
     });
-    //昇順でソート20件までメソッドチェーンで一括処理、テンプレートリテラルで見やすく少なく記述、conTextでXSS対策
+    //降順でソート20件までメソッドチェーンで一括処理、テンプレートリテラルで見やすく少なく記述、conTextでXSS対策
     const fragment = document.createDocumentFragment();
     Object.entries(counts)
         .sort((a, b) => b[1] - a[1])
@@ -156,16 +157,21 @@ function analyze() {
 function addExclude(word) {
     const excludeInput = document.getElementById("exclude");
 
-    const current = excludeInput.value
-        .split(",")
-        .map(w => w.trim())
-        .filter(w => w !== "");
-
-    if (!current.includes(word)) {
-        current.push(word);
-        excludeInput.value = current.join(", ");
-    }
+  const current = excludeInput.value
+    .split(",")
+    .reduce((acc, w) => {
+      const trimmed = w.trim();
+      if (trimmed !== "" && !acc.includes(trimmed)) {
+        acc.push(trimmed);
+      }
+      return acc;
+    }, []);
+  if (!current.includes(word)) {
+    current.push(word);
+  }
+  excludeInput.value = current.join(", ");
 }
+
 
 //CSVダウンロード部分
 document.getElementById('downloadBtn').addEventListener('click', () => {
