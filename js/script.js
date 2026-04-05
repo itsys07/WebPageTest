@@ -78,7 +78,7 @@ const presets = {
 
 const clearBtn = document.getElementById('clearBtn');
 clearBtn.addEventListener('click', () => {
-    // 3. textareaの値を空にする
+    // textareaの値を空にする
     text.value = '';
     return;
 });
@@ -94,10 +94,16 @@ const tagDisplay = document.getElementById('tagDisplay');
 function addTag() {
     const tagText = exclude.value.toLowerCase();
     if (tagText && !tags.includes(tagText)) {
-        tags.push(tagText); // 配列に追加
-        exclude.value = '';
+        tags.push(tagText); 
+        // 配列に追加
+        
         renderTags();
+    }else{
+        const message = document.getElementById('message')
+        .textContent = "すでに追加されています";
+        setTimeout(() => message.textContent = "", 1000);
     }
+    exclude.value = '';
 }
 
 function renderTags() {
@@ -116,7 +122,8 @@ function renderTags() {
 tagDisplay.addEventListener('click', (e) => {
     if (e.target.classList.contains('remove-tag')) {
         const index = e.target.getAttribute('data-index');
-        tags.splice(index, 1); // 配列から要素を削除
+        tags.splice(index, 1); 
+        // 配列から要素を削除
         renderTags(); // 再描画
     }
 });
@@ -197,19 +204,18 @@ function analyze() {
 function addExclude(word) {
     const excludeInput = document.getElementById("exclude");
 
-  const current = excludeInput.value
+const current = [...new Set(
+  excludeInput.value
     .split(",")
-    .reduce((acc, w) => {
-      const trimmed = w.trim();
-      if (trimmed !== "" && !acc.includes(trimmed)) {
-        acc.push(trimmed);
-      }
-      return acc;
-    }, []);
-  if (!current.includes(word)) {
-    current.push(word);
-  }
-  excludeInput.value = current.join(", ");
+    .map(w => w.trim())
+    .filter(w => w !== "")
+)];
+
+if (!current.includes(word)) {
+  current.push(word);
+}
+
+excludeInput.value = current.join(", ");
 }
 
 //CSVダウンロード部分

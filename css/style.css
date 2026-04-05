@@ -21,6 +21,17 @@
     transition: .5s;
 }
 
+.container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+input, select, button {
+    padding: 8px 12px;
+    margin: 6px 0;
+}
+
 body {
     font-family: sans-serif;
     max-width: 600px;
@@ -67,6 +78,11 @@ input[type="search"] {
     transition: .5s;
 }
 
+input:focus {
+  outline: none;
+  border: 1px solid var(--main-color);
+}
+
 .tag-container {
     padding: 20px;
 }
@@ -80,15 +96,21 @@ input[type="search"] {
 
 .tag-item {
     background-color: var(--main-color);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 15px;
-    display: flex;
+    color: var(--text-color)e;
+    padding: 4px 10px;
+    border-radius: 16px;
+    display: inline-block;
+    margin: 4px;
     align-items: center;
     font-size: 14px;
 }
+
+.tag-item.flash {
+  background: #ffdcdc;
+}
+
 .remove-tag {
-    margin-left: 8px;
+    margin-left: 6px;
     cursor: pointer;
     font-weight: bold;
 }
