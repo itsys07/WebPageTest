@@ -81,6 +81,23 @@ dropされたファイルを指定の変数名で受け取る
 FileReader()
 受け取ったfileの読み取りを行うオブジェクト、テキスト（readAsText()）や画像（readAsDataURL()）、バイナリデータ（readAsArrayBuffer()）を受けとるメソッドを持つ、また受けとり時のエラーハンドリングメソッド（正常終了.onload、onerrorエラー発生）を持つ。変数.target.resultに読み取ったデータを渡す。
 
+#### 除外ワードをタグ化
+- グローバルtags配列定義
+追加ボタンaddBtn、描画Element：tagDisplay定義
+関数addTag
+tagTextにexcludeの値を小文字化して定義
+tagTextがtagsになければtagsに追加
+exclide空白
+関数renderTags呼び出し。
+関数renderTags
+tagDisplay初期化
+tagSpan定義tagSpanにtag-itemクラス付与、
+テンプレートリテラルでtagsとindexでspan要素を生成
+HTMLでクリックすると削除されるtagDisplayElement生成、tagDisplayに追加して描画。
+indexを定義getAttributeでtagDisplayの属性を取得.spliceでindexから1要素削除
+renderTagsで再描画
+
+
 #### ダークモードを（color-scheme + ボタン）に対応する。
 - 現在のトグル切り替え式に加えschemeでOSやブラウザの設定からも切り替えに対応。
 2種類の系統を一元管理したい。

@@ -92,7 +92,7 @@ const addBtn = document.getElementById('addBtn');
 const tagDisplay = document.getElementById('tagDisplay');
 
 function addTag() {
-    const tagText = exclude.value;
+    const tagText = exclude.value.toLowerCase();
     if (tagText && !tags.includes(tagText)) {
         tags.push(tagText); // 配列に追加
         exclude.value = '';
@@ -211,7 +211,6 @@ function addExclude(word) {
   }
   excludeInput.value = current.join(", ");
 }
-
 
 //CSVダウンロード部分
 document.getElementById('downloadBtn').addEventListener('click', () => {

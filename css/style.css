@@ -48,7 +48,7 @@ h2 {
 textarea {
     background-color: var(--bg-color);
     width: 98%;
-    height: 50px;
+    height: 100px;
     padding: 5px;
     color: var(--text-color);
     border: 1px solid #ccc;
@@ -56,7 +56,7 @@ textarea {
     transition: .5s;
 }
 
-/*input[type="search"] {
+input[type="search"] {
     width: 98%;
     height: 30px;
     padding: 5px;
@@ -65,12 +65,21 @@ textarea {
     border: 1px solid #ccc;
     border-radius: 4px;
     transition: .5s;
-}*/
+}
 
-.tag-container { padding: 20px; }
-#tagDisplay { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+.tag-container {
+    padding: 20px;
+}
+
+#tagDisplay {
+    margin-top: 10px; 
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+ }
+
 .tag-item {
-    background-color: #007bff;
+    background-color: var(--main-color);
     color: white;
     padding: 5px 10px;
     border-radius: 15px;
@@ -99,7 +108,7 @@ button:hover {
     background: #1a3b1c;
 }
 
-#clearBtn {
+#clearBtn ,#addBtn {
     width: 30%;
 }
 
@@ -129,7 +138,6 @@ button:hover {
 }
 
 #mode{
-
     width: 100%;
     max-width: 300px;
     padding: 10px 15px;
@@ -139,19 +147,16 @@ button:hover {
     color: var(--text-color);
     background-color: var(--bg-color);
     cursor: pointer;
-
 }
 
 #modde:hover {
   border-color: #888;
 }
 
-
 /*#loading {
     animation: blink 1s linear infinite;
     color: var(--text-color);
     transition: color 1s;
-
 }*/
 
 .blink {
